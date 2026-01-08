@@ -1,0 +1,26 @@
+name: Deploiement Automatique
+
+# On déclenche l'action quand on push sur la branche main
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # LA PARTIE MAGIQUE : On dit à GitHub d'utiliser TON ordi (le runner qu'on a installé)
+    runs-on: self-hosted
+
+    steps:
+    # 1. GitHub récupère la dernière version de ton code
+    - uses: actions/checkout@v3
+
+    # 2. On affiche un petit message pour le style
+    - name: Dire bonjour
+      run: echo "Début du déploiement sur la VM Vagrant..."
+
+    # 3. On copie les fichiers du dépôt vers le dossier du site web Nginx
+    # Comme on a donné les droits dans le Vagrantfile, pas besoin de sudo
+    - name: Mise à jour du site web
+      run: |
+        cp index.html /var/www/html/index.html
+        echo "Site mis à jour avec succès !"
