@@ -1,20 +1,20 @@
-name: Deploiement Automatique
+name: Deploiement Automatique Multi-Env
 
+# On déclenche le pipeline sur les modifications de 'main' ET 'develop'
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
 jobs:
   build:
     runs-on: self-hosted
 
     steps:
-    # 1. On récupère le code
+    # 1. Récupération du code
     - uses: actions/checkout@v3
 
-    # 2. PARTIE CI : Le Test de Qualité
-    # On cherche le mot "INTERDIT" dans index.html
-    # Si on le trouve, grep renvoie 0 (succès), donc on force une erreur (exit 1)
+    # 2. INTÉGRATION CONTINUE (CI) - Le Gardien
+    # On garde notre test de sécurité, il s'applique aux deux environnements !
     - name: Test de Sécurité (CI)
       run: |
         if grep -q "INTERDIT" index.html; then
@@ -24,9 +24,22 @@ jobs:
           echo "✅ Test validé : Code propre."
         fi
 
-    # 3. PARTIE CD : Le Déploiement
-    # Cette étape ne se lance QUE si l'étape précédente a réussi
-    - name: Mise à jour du site web
+    # 3. DÉPLOIEMENT CONTINU (CD) - CONDITIONNEL
+
+    # CAS A : C'est la branche MAIN -> On envoie sur PROD (Port 8080)
+    - name: Déploiement PROD
+      if: github.ref == 'refs/heads/main'
       run: |
-        cp index.html /var/www/html/index.html
-        echo "🚀 Site mis à jour avec succès !"
+        # On s'assure que le dossier existe
+        mkdir -p /var/www/prod
+        cp index.html /var/www/prod/index.html
+        echo "🚀 Déployé en PRODUCTION (Port 8080)"
+
+    # CAS B : C'est la branche DEVELOP -> On envoie sur STAGING (Port 8081)
+    - name: Déploiement STAGING
+      if: github.ref == 'refs/heads/develop'
+      run: |
+        # On s'assure que le dossier existe
+        mkdir -p /var/www/staging
+        cp index.html /var/www/staging/index.html
+        echo "🧪 Déployé en STAGING (Port 8081)"

@@ -5,6 +5,7 @@ Vagrant.configure("2") do |config|
   # 2. On configure le réseau
   # On dit que le port 80 de la VM (site web) est accessible sur le port 8080 de ton PC
   config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 81, host: 8081
   
   # On donne une IP privée à la machine pour lui parler
   config.vm.network "private_network", ip: "192.168.56.10"
