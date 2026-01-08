@@ -1,26 +1,32 @@
 name: Deploiement Automatique
 
-# On déclenche l'action quand on push sur la branche main
 on:
   push:
     branches: [ "main" ]
 
 jobs:
   build:
-    # LA PARTIE MAGIQUE : On dit à GitHub d'utiliser TON ordi (le runner qu'on a installé)
     runs-on: self-hosted
 
     steps:
-    # 1. GitHub récupère la dernière version de ton code
+    # 1. On récupère le code
     - uses: actions/checkout@v3
 
-    # 2. On affiche un petit message pour le style
-    - name: Dire bonjour
-      run: echo "Début du déploiement sur la VM Vagrant..."
+    # 2. PARTIE CI : Le Test de Qualité
+    # On cherche le mot "INTERDIT" dans index.html
+    # Si on le trouve, grep renvoie 0 (succès), donc on force une erreur (exit 1)
+    - name: Test de Sécurité (CI)
+      run: |
+        if grep -q "INTERDIT" index.html; then
+          echo "⛔ ERREUR : Contenu interdit détecté !"
+          exit 1
+        else
+          echo "✅ Test validé : Code propre."
+        fi
 
-    # 3. On copie les fichiers du dépôt vers le dossier du site web Nginx
-    # Comme on a donné les droits dans le Vagrantfile, pas besoin de sudo
+    # 3. PARTIE CD : Le Déploiement
+    # Cette étape ne se lance QUE si l'étape précédente a réussi
     - name: Mise à jour du site web
       run: |
         cp index.html /var/www/html/index.html
-        echo "Site mis à jour avec succès !"
+        echo "🚀 Site mis à jour avec succès !"
