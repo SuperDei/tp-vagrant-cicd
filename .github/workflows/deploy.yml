@@ -1,6 +1,5 @@
 name: Deploiement Automatique Multi-Env
 
-# On déclenche le pipeline sur les modifications de 'main' ET 'develop'
 on:
   push:
     branches: [ "main", "develop" ]
@@ -13,8 +12,7 @@ jobs:
     # 1. Récupération du code
     - uses: actions/checkout@v3
 
-    # 2. INTÉGRATION CONTINUE (CI) - Le Gardien
-    # On garde notre test de sécurité, il s'applique aux deux environnements !
+    # 2. TEST CI (Sécurité)
     - name: Test de Sécurité (CI)
       run: |
         if grep -q "INTERDIT" index.html; then
@@ -24,22 +22,38 @@ jobs:
           echo "✅ Test validé : Code propre."
         fi
 
-    # 3. DÉPLOIEMENT CONTINU (CD) - CONDITIONNEL
+    # 3. DÉPLOIEMENT (CD)
 
-    # CAS A : C'est la branche MAIN -> On envoie sur PROD (Port 8080)
+    # Cas PROD (Main)
     - name: Déploiement PROD
       if: github.ref == 'refs/heads/main'
       run: |
-        # On s'assure que le dossier existe
         mkdir -p /var/www/prod
         cp index.html /var/www/prod/index.html
-        echo "🚀 Déployé en PRODUCTION (Port 8080)"
+        echo "ENV_NAME=PRODUCTION (Port 8080)" >> $GITHUB_ENV
 
-    # CAS B : C'est la branche DEVELOP -> On envoie sur STAGING (Port 8081)
+    # Cas STAGING (Develop)
     - name: Déploiement STAGING
       if: github.ref == 'refs/heads/develop'
       run: |
-        # On s'assure que le dossier existe
         mkdir -p /var/www/staging
         cp index.html /var/www/staging/index.html
-        echo "🧪 Déployé en STAGING (Port 8081)"
+        echo "ENV_NAME=STAGING (Port 8081)" >> $GITHUB_ENV
+
+    # 4. NOTIFICATIONS DISCORD (La nouveauté)
+
+    # En cas de SUCCÈS
+    - name: Notification Discord - Succès
+      if: success()
+      run: |
+        curl -H "Content-Type: application/json" \
+        -d "{\"content\": \"🚀 **DÉPLOIEMENT RÉUSSI !**\\n\\n🌍 **Environnement :** ${{ env.ENV_NAME }}\\n✅ Le nouveau site est en ligne.\\n👤 *Déclenché par : ${{ github.actor }}*\"}" \
+        "${{ secrets.DISCORD_WEBHOOK }}"
+
+    # En cas d'ÉCHEC (Bug ou mot interdit)
+    - name: Notification Discord - Erreur
+      if: failure()
+      run: |
+        curl -H "Content-Type: application/json" \
+        -d "{\"content\": \"🚨 **ÉCHEC DU DÉPLOIEMENT**\\n\\n❌ Une erreur a bloqué la mise à jour.\\n👉 Vérifiez les logs sur GitHub.\"}" \
+        "${{ secrets.DISCORD_WEBHOOK }}"
