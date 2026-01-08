@@ -1,17 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Mon Projet CI/CD</title>
+    <meta charset="UTF-8">
+    <title>Dashboard Infrastructure</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #e0f7fa; }
-        h1 { color: #333; }
-        .status { color: green; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: #16213e; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; max-width: 500px; border-top: 5px solid #0f3460; }
+        h1 { margin-bottom: 10px; font-size: 2.5em; }
+        .env-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        .prod { background: #e94560; color: white; box-shadow: 0 0 15px #e94560; }
+        .staging { background: #f39c12; color: white; box-shadow: 0 0 15px #f39c12; }
+        p { color: #aeb6bf; margin: 10px 0; }
+        .status-dot { height: 15px; width: 15px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 10px; }
+        .footer { margin-top: 30px; font-size: 0.8em; color: #5dade2; }
     </style>
 </head>
 <body>
-    <h1>🚧 VERSION DE TEST (STAGING) 🚧</h1>
-    <p>Version du site : <span class="status">V2.0 - CI/CD ACTIVE !</span></p>
-    <p>Déployé automatiquement depuis GitHub.</p>
-    <p>Ceci est un document confidentiel au public.</p>
+    <div class="card">
+        <div class="env-badge staging">ENVIRONNEMENT STAGING</div>
+        
+        <h1>Système Opérationnel</h1>
+        <p><span class="status-dot"></span>Tous les services sont actifs</p>
+        <p>Serveur: Nginx / Ubuntu 20.04</p>
+        <p>Déploiement: Automatisé via GitHub Actions</p>
+        
+        <div class="footer">
+            Dernière mise à jour : <script>document.write(new Date().toLocaleTimeString())</script>
+        </div>
+    </div>
 </body>
 </html>
